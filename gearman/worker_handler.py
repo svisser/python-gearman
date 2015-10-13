@@ -44,7 +44,7 @@ class GearmanWorkerCommandHandler(GearmanCommandHandler):
         self._client_id = client_id
 
         if self._client_id is not None:
-            self.send_command(GEARMAN_COMMAND_SET_CLIENT_ID, client_id=self._client_id)
+            self.send_command(GEARMAN_COMMAND_SET_CLIENT_ID, client_id=self._client_id.encode('ascii'))
 
     ###############################################################
     #### Convenience methods for typical gearman jobs to call #####

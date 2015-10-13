@@ -137,11 +137,11 @@ class WorkerCommandHandlerInterfaceTest(_GearmanAbstractWorkerTest):
 
     def test_on_connect(self):
         expected_abilities = ['function_one', 'function_two', 'function_three']
-        expected_client_id = 'my_client_id'
+        expected_client_id = b'my_client_id'
 
         self.connection.connected = False
 
-        self.connection_manager.set_client_id(expected_client_id)
+        self.connection_manager.set_client_id(expected_client_id.decode('ascii'))
         self.connection_manager.unregister_task('__test_ability__')
         for task in expected_abilities:
             self.connection_manager.register_task(task, None)
@@ -166,14 +166,14 @@ class WorkerCommandHandlerInterfaceTest(_GearmanAbstractWorkerTest):
         self.assert_no_pending_commands()
 
     def test_set_client_id(self):
-        expected_client_id = 'my_client_id'
+        expected_client_id = b'my_client_id'
 
         handler_initial_state = {}
         handler_initial_state['abilities'] = []
         handler_initial_state['client_id'] = None
 
         # We were disconnected, connect and wipe pending commands
-        self.command_handler.set_client_id(expected_client_id)
+        self.command_handler.set_client_id(expected_client_id.decode('ascii'))
         self.assert_sent_client_id(expected_client_id)
         self.assert_no_pending_commands()
 
