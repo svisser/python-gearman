@@ -38,13 +38,13 @@ class GearmanWorkerCommandHandler(GearmanCommandHandler):
 
         self.send_command(GEARMAN_COMMAND_RESET_ABILITIES)
         for task in self._handler_abilities:
-            self.send_command(GEARMAN_COMMAND_CAN_DO, task=task)
+            self.send_command(GEARMAN_COMMAND_CAN_DO, task=task.encode('ascii'))
 
     def set_client_id(self, client_id):
         self._client_id = client_id
 
         if self._client_id is not None:
-            self.send_command(GEARMAN_COMMAND_SET_CLIENT_ID, client_id=self._client_id)
+            self.send_command(GEARMAN_COMMAND_SET_CLIENT_ID, client_id=self._client_id.encode('ascii'))
 
     ###############################################################
     #### Convenience methods for typical gearman jobs to call #####
@@ -128,6 +128,7 @@ class GearmanWorkerCommandHandler(GearmanCommandHandler):
 
         AWAITING_JOB -> EXECUTE_JOB -> SLEEP :: Always transition once we're given a job
         """
+        task = task.decode('ascii')
         assert task in self._handler_abilities, '%s not found in %r' % (task, self._handler_abilities)
 
         # After this point, we know this connection handler is holding onto the job lock so we don't need to acquire it again
