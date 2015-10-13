@@ -49,6 +49,7 @@ class ClientTest(_GearmanAbstractTest):
 
     def generate_job_request(self, submitted=True, accepted=True):
         current_request = super(ClientTest, self).generate_job_request()
+        current_request.job.task = current_request.job.task.decode('ascii')
         if submitted or accepted:
             self.connection_manager.establish_request_connection(current_request)
             self.command_handler.send_job_request(current_request)
@@ -166,6 +167,8 @@ class ClientTest(_GearmanAbstractTest):
     def test_multiple_fg_job_submission(self):
         submitted_job_count = 5
         expected_job_list = [self.generate_job() for _ in range(submitted_job_count)]
+        for j in expected_job_list:
+            j.task = j.task.decode('ascii')
         def mark_jobs_created(rx_conns, wr_conns, ex_conns):
             for current_job in expected_job_list:
                 self.command_handler.recv_command(GEARMAN_COMMAND_JOB_CREATED, job_handle=current_job.handle)
@@ -190,6 +193,7 @@ class ClientTest(_GearmanAbstractTest):
 
     def test_single_bg_job_submission(self):
         expected_job = self.generate_job()
+        expected_job.task = expected_job.task.decode('ascii')
         def mark_job_created(rx_conns, wr_conns, ex_conns):
             self.command_handler.recv_command(GEARMAN_COMMAND_JOB_CREATED, job_handle=expected_job.handle)
             return rx_conns, wr_conns, ex_conns
@@ -208,6 +212,7 @@ class ClientTest(_GearmanAbstractTest):
 
     def test_single_fg_job_submission_timeout(self):
         expected_job = self.generate_job()
+        expected_job.task = expected_job.task.decode('ascii')
         def job_failed_submission(rx_conns, wr_conns, ex_conns):
             return rx_conns, wr_conns, ex_conns
 
@@ -318,6 +323,7 @@ class ClientCommandHandlerInterfaceTest(_GearmanAbstractTest):
 
     def test_send_job_request(self):
         current_request = self.generate_job_request()
+        current_request.job.task = current_request.job.task.decode('ascii')
         gearman_job = current_request.job
 
         for priority in (PRIORITY_NONE, PRIORITY_HIGH, PRIORITY_LOW):
@@ -332,7 +338,7 @@ class ClientCommandHandlerInterfaceTest(_GearmanAbstractTest):
                 self.assertEqual(queued_request, current_request)
 
                 expected_cmd_type = submit_cmd_for_background_priority(background, priority)
-                self.assert_sent_command(expected_cmd_type, task=gearman_job.task, data=gearman_job.data, unique=gearman_job.unique)
+                self.assert_sent_command(expected_cmd_type, task=gearman_job.task.encode('ascii'), data=gearman_job.data, unique=gearman_job.unique)
 
     def test_get_status_of_job(self):
         current_request = self.generate_job_request()
@@ -349,6 +355,7 @@ class ClientCommandHandlerStateMachineTest(_GearmanAbstractTest):
 
     def generate_job_request(self, submitted=True, accepted=True):
         current_request = super(ClientCommandHandlerStateMachineTest, self).generate_job_request()
+        current_request.job.task = current_request.job.task.decode('ascii')
         if submitted or accepted:
             self.command_handler.requests_awaiting_handles.append(current_request)
             current_request.state = JOB_PENDING
